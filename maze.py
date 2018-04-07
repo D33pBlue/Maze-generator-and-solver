@@ -333,7 +333,7 @@ def solve(L):
 		return [(x['r'],x['c']) for x in path]
 
 if __name__ == '__main__':
-	L = make_maze(14,14)
+	L = make_maze(24,24)
 	show(L)
 	path = solve(L)
 	print('path:',path)

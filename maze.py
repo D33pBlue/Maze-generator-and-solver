@@ -10,6 +10,7 @@
 # -adj: the adjacency list of the cell
 
 import random
+import time
 
 def make_cell(r,c,n=True,s=True,e=True,w=True,state=""):
 	cell=dict()
@@ -69,20 +70,20 @@ def has_cycle(L,end):
 							stack.append(state)
 	return False
 
-def find_cycle(start):
+def find_cycle(start,L):
 	if start == None:
 		return []
-	stack = []
+	fifo = []
 	for c in start['adj']:
-		stack.append((c,[start]))
-	while len(stack)>0:
-		c,path = stack.pop()
+		fifo.insert(0,(c,[start]))
+	while len(fifo)>0:
+		c,path = fifo.pop()
 		path.append(c)
 		if c == start:
 			return path
 		for cell in c['adj']:
 			if not cell in path or (cell==start and cell!=path[len(path)-1]):
-				stack.append((cell,path[:]))
+				fifo.insert(0,(cell,path[:]))
 	return []
 
 def find_path(c1,c2):
@@ -284,7 +285,7 @@ def perfect(L):
 	return connected(L)
 
 
-def make_maze(r,c):
+def make_maze(r,c,verbose=False):
 	L = [[make_cell(i,j) for j in range(c)] for i in range(r)]
 	for l in L:
 		for cell in l:
@@ -292,21 +293,33 @@ def make_maze(r,c):
 	while not perfect(L):
 		cycle=[]
 		end = [None]
+		i = 0
 		while has_cycle(L,end):
-			cycle = find_cycle(end[0])
+			if verbose:
+				print("1.cycle: ",i)
+			cycle = find_cycle(end[0],L)
 			c1=cycle.pop()
 			c2=cycle.pop()
 			put_wall(c1,c2)
 			end = [None]
+			i += 1
+		i = 0
 		while not connected(L):
+			if verbose:
+				print("2.connected: ",i)
 			for k in low_degree_cells(L):
 				delete_random_wall(L,k)
+			y = 0
 			while has_cycle(L,end):
-				cycle = find_cycle(end[0])
+				if verbose:
+					print("2.1.cycle: ",y)
+				cycle = find_cycle(end[0],L)
 				c1=cycle.pop()
 				c2=cycle.pop()
 				put_wall(c1,c2)
 				end = [None]
+				y += 1
+			i += 1
 	add_exit(L)
 	add_exit(L)
 	return L

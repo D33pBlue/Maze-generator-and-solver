@@ -121,7 +121,6 @@ def connected(L):
 
 
 def delete_random_wall(L,cell):
-	# print cell
 	i,j=cell['r'],cell['c']
 	k=(i,j)
 	k_n=(i-1,j)
@@ -156,7 +155,6 @@ def delete_random_wall(L,cell):
 		elif jc>j:
 			cell['e']=False
 			neigh['w']=False
-	# print cell
 
 
 def low_degree_cells(L):
@@ -192,63 +190,6 @@ def put_wall(c1,c2):
 	elif jc>j:
 		c1['e']=True
 		c2['w']=True
-
-
-# def importa(file):
-# 	contenuto = []
-# 	#viene letto il contenuto del file in una lista di string
-# 	f = open(file)
-# 	if f==None:
-# 		print "Errore nella lettura del file"
-# 		return None
-# 	for r in f.readlines():
-# 		contenuto.append(r.strip("\n"))
-# 	f.close()
-# 	text_r = len(contenuto)
-# 	if text_r == 0:
-# 		return None
-# 	text_c = 0
-# 	for r in contenuto:
-# 		if len(r)>text_c:
-# 			text_c=len(r)
-# 	#verifica della conformita' del contenuto del file
-# 	for r_i in contenuto:
-# 		if len(r_i) != text_c or contiene_caratteri_non_conformi(r_i):
-# 			print "Errore nel formato del file"
-# 			return None
-# 	r=(text_r-1)/2
-# 	c=(text_c-1)/2
-# 	#inizializzazione della matrice che rappresenta il maze
-# 	maze = []
-# 	for i in range(r):
-# 		maze.append([])
-# 		for j in range(c):
-# 			maze[i].append(None)
-# 	#costruzione della matrice inserendo le Celle in base ai dati del file
-# 	for i in range(r):
-# 		for j in range(c):
-# 			#coordinate della cella nel testo
-# 			t_i=1+2*i
-# 			t_j=1+2*j
-# 			#costruzione della cella
-# 			maze[i][j]=crea_cella(
-# 				r = i,
-# 				c = j,
-# 				n = contenuto[t_i-1][t_j]=='*',
-#  				s = contenuto[t_i+1][t_j]=='*',
-#  				o = contenuto[t_i][t_j-1]=='*',
-#  				e = contenuto[t_i][t_j+1]=='*',
-# 	 			stato = ""
-# 			)
-# 			#aggiornamento delle celle collegate (adiacenti e non separate da muro)
-# 			possibili_collegate=[(i-1,j),(i,j-1)]
-# 			for p_col in possibili_collegate:
-# 				if(cella_presente(maze,p_col) and
-# 					collegate(maze,(i,j),p_col)):
-# 					cella_col=maze[p_col[0]][p_col[1]]
-# 					add_collegata(maze[i][j],cella_col)
-# 					add_collegata(cella_col,maze[i][j])
-# 	return maze
 
 
 def exits(L):
@@ -308,7 +249,7 @@ def show(L):
 			else:
 				line+="+   "
 		line+= "+"
-		print line
+		print(line)
 		line = ""
 		for j in range(c):
 			if L[i][j]['w']:
@@ -323,7 +264,7 @@ def show(L):
 					line+="    "
 		if L[i][c-1]['e']:
 			line+= "|"
-		print line
+		print(line)
 		line=""
 	for j in range(c):
 		if L[i][j]['s']:
@@ -331,7 +272,7 @@ def show(L):
 		else:
 			line+="+   "
 	line+="+"
-	print line
+	print(line)
 
 
 
@@ -370,6 +311,19 @@ def make_maze(r,c):
 	add_exit(L)
 	return L
 
+def solve(L):
+	exts = exits(L)
+	if len(exts)>=2:
+		e1 = L[exts[0][0]][exts[0][1]]
+		e2 = L[exts[1][0]][exts[1][1]]
+		path = find_path(e1,e2)
+		return [(x['r'],x['c']) for x in path]
+
 if __name__ == '__main__':
 	L = make_maze(14,14)
+	show(L)
+	path = solve(L)
+	print('path:',path)
+	for x in path:
+		L[x[0]][x[1]]['state'] = 'Path'
 	show(L)

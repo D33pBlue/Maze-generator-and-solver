@@ -10,7 +10,6 @@
 # -adj: the adjacency list of the cell
 
 import random
-import numpy as np
 
 def make_cell(r,c,n=True,s=True,e=True,w=True,state=""):
 	cell=dict()
@@ -25,11 +24,15 @@ def make_cell(r,c,n=True,s=True,e=True,w=True,state=""):
 	return cell
 
 def add_adj(cell,adj):
-	cell['adj'].append(adj)
+	if not adj in cell['adj']:
+		cell['adj'].append(adj)
 
-# L is a numpy array of cells (square)
+def get_shape(L):
+	return (len(L),len(L[0]))
+
+# L is a array of cells (square)
 def check_cell(L,c):
-	Lr,Lc = L.shape
+	Lr,Lc = get_shape(L)
 	i,j=c
 	if i<0 or i>=Lr or j<0 or j>=Lc:
 		return False
@@ -96,6 +99,7 @@ def find_path(c1,c2):
 	return []
 
 
+
 def findable_cells(c):
 	stack=[]
 	visited=set()
@@ -112,11 +116,12 @@ def findable_cells(c):
 
 
 def connected(L):
-	r,c=L.shape
+	r,c=get_shape(L)
 	return r*c==findable_cells(L[0][0])
 
 
 def delete_random_wall(L,cell):
+	# print cell
 	i,j=cell['r'],cell['c']
 	k=(i,j)
 	k_n=(i-1,j)
@@ -151,6 +156,7 @@ def delete_random_wall(L,cell):
 		elif jc>j:
 			cell['e']=False
 			neigh['w']=False
+	# print cell
 
 
 def low_degree_cells(L):
@@ -247,7 +253,7 @@ def put_wall(c1,c2):
 
 def exits(L):
 	u = []
-	r,c= L.shape
+	r,c= get_shape(L)
 	for j in range(c):
 		if L[0][j]['n'] == False:
 			if not (0,j) in u:
@@ -266,7 +272,7 @@ def exits(L):
 
 
 def add_exit(L):
-	r,c= L.shape
+	r,c= get_shape(L)
 	possible_exits=[]
 	for j in range(c):
 		possible_exits.append((0,j))
@@ -293,7 +299,7 @@ def add_exit(L):
 
 
 def show(L):
-	r,c = L.shape
+	r,c = get_shape(L)
 	line=""
 	for i in range(r):
 		for j in range(c):
@@ -337,9 +343,8 @@ def perfect(L):
 	return connected(L)
 
 
-
 def make_maze(r,c):
-	L = np.array([[make_cell(i,j) for j in range(c)] for i in range(r)])
+	L = [[make_cell(i,j) for j in range(c)] for i in range(r)]
 	for l in L:
 		for cell in l:
 			delete_random_wall(L,cell)
@@ -366,5 +371,5 @@ def make_maze(r,c):
 	return L
 
 if __name__ == '__main__':
-	L = make_maze(70,10)
+	L = make_maze(14,14)
 	show(L)

@@ -157,6 +157,23 @@ def delete_random_wall(L,cell):
 			cell['e']=False
 			neigh['w']=False
 
+def delete_wall(cell,neigh):
+	i,j=cell['r'],cell['c']
+	ic,jc=neigh['r'],neigh['c']
+	add_adj(neigh,cell)
+	add_adj(cell,neigh)
+	if ic<i:
+		cell['n']=False
+		neigh['s']=False
+	elif ic>i:
+		cell['s']=False
+		neigh['n']=False
+	elif jc<j:
+		cell['w']=False
+		neigh['e']=False
+	elif jc>j:
+		cell['e']=False
+		neigh['w']=False
 
 def low_degree_cells(L):
 	m=4
@@ -285,6 +302,55 @@ def perfect(L):
 	return connected(L)
 
 
+def DFS_visited(u,visited):
+	u['color'] = 'G'
+	visited.append(u)
+	for cell in u['adj']:
+		if cell['color'] == 'W':
+			visited = DFS_visited(cell,visited)
+	u['color'] = 'B'
+	return visited
+
+def connected_components(L):
+	r,c = get_shape(L)
+	for i in range(r):
+		for j in range(c):
+			L[i][j]['color'] = 'W'
+	CC = []
+	for i in range(r):
+		for j in range(c):
+			if L[i][j]['color'] == 'W':
+				comp = DFS_visited(L[i][j],[])
+				CC.append(comp)
+	return CC
+
+def join_components(CC):
+	c1 = 0
+	c2 = 1
+	joined = False
+	while len(CC) > 1:
+		while not joined and c2<len(CC):
+			cx1,cx2 = 0,0
+			while not joined and cx1<len(CC[c1]):
+				while not joined and cx2<len(CC[c2]):
+					cell1 = CC[c1][cx1]
+					cell2 = CC[c2][cx2]
+					if adjacent((cell1['r'],cell1['c']),(cell2['r'],cell2['c'])):
+						delete_wall(cell1,cell2)
+						for x in CC[c2]:
+							CC[c1].append(x)
+						del CC[c2]
+						joined = True
+					else:
+						cx2 += 1
+				cx1 += 1
+				cx2 = 0
+			c2 += 1
+			cx1,cx2 = 0,0
+		joined = False
+		c2 = 1
+
+
 def make_maze(r,c,verbose=False):
 	L = [[make_cell(i,j) for j in range(c)] for i in range(r)]
 	for l in L:
@@ -307,8 +373,9 @@ def make_maze(r,c,verbose=False):
 		while not connected(L):
 			if verbose:
 				print("2.connected: ",i)
-			for k in low_degree_cells(L):
-				delete_random_wall(L,k)
+			join_components(connected_components(L))
+			# for k in low_degree_cells(L):
+			# 	delete_random_wall(L,k)
 			y = 0
 			while has_cycle(L,end):
 				if verbose:
@@ -333,7 +400,7 @@ def solve(L):
 		return [(x['r'],x['c']) for x in path]
 
 if __name__ == '__main__':
-	L = make_maze(24,24)
+	L = make_maze(105,105,True)
 	show(L)
 	path = solve(L)
 	print('path:',path)
